@@ -123,10 +123,10 @@ Tangle.classes.T3ImShow = {
 		
 		// Set the d3 scales for this graph (value transformations)
 		[t, l, b, r] = options.domain.split(" ");
-		[t, l, b, r] = [parseFloat(t), parseFloat(l), parseFloat(b), parseFloat(r)]
+		[t, l, b, r] = [parseFloat(t), parseFloat(l), parseFloat(b), parseFloat(r)];
 		this.ctx = element.getContext("2d");
-		this.ctx.canvas.width = Math.abs(l-r)/otions.step);
-		this.ctx.canvas.height = Math.abs(b-t)/otions.step);
+		this.ctx.canvas.width = Math.abs(l-r)/options.step;
+		this.ctx.canvas.height = Math.abs(b-t)/options.step;
 
 		domain_x = d3.scale.linear()
 			.domain([l, r])
