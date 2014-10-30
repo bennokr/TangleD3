@@ -49,34 +49,41 @@ Tangle.classes.T3DataPoint = {
 		element.from_y = make(options['from-y'], 'y');
 		element.to_y = make(options['to-y'], y_var);
 
+		element.domain_x = element.parentNode.domain_x.copy();
+		element.domain_y = element.parentNode.domain_y.copy();
+	},
+	update: function (element, x_val, y_val) {
+		// Transform values to coordinates, update position
+		var x = element.domain_x(element.to_x(x_val)),
+		    y = element.domain_y(element.to_y(y_val));
+		d3.select(element)
+		  .attr("transform", "translate("+x+","+y+")");
+	}
+};
+
+Tangle.classes.T3BoundedDraggable = {
+	initialize: function (element, options, tangle, x_var, y_var) {
+		element.coolness = 'fleeting';
 		// Set this points drag behaviour
 		var drag = d3.behavior.drag()
 			.origin(Object)
 			.on("drag", function(){
-				var el = d3.select(this),
-				    graph = element.parentNode;
-				var cx = +el.attr("cx"),
-				    cy = +el.attr("cy"),
-				    r = +el.attr("r"),
-				    w = graph.offsetWidth,
-				    h = graph.offsetHeight;
+				console.log('bounded', d3.event.sourceEvent.target.coolness);
+				var el = d3.select(this);
+				[cx, cy] = d3.transform(el.attr("transform")).translate;
+				var w = element.parentNode.offsetWidth,
+				    h = element.parentNode.offsetHeight;
 				// Keep the point in the boundary
-				cx = Math.max(r, Math.min(w - r, cx + d3.event.dx));
-				cy = Math.max(r, Math.min(h - r, cy + d3.event.dy));
+				cx = Math.max(0, Math.min(w, cx + d3.event.dx));
+				cy = Math.max(0, Math.min(h, cy + d3.event.dy));
 				// Transform coordinates to values 
-				tangle.setValue(x_var, this.from_x(graph.domain_x.invert(cx)));
-				tangle.setValue(y_var, this.from_y(graph.domain_y.invert(cy)));
+				tangle.setValue(x_var, this.from_x(element.domain_x.invert(cx)));
+				tangle.setValue(y_var, this.from_y(element.domain_y.invert(cy)));
 			});
 		d3.select(element).call(drag);
-	},
-	update: function (element, x_val, y_val) {
-		// Transform values to coordinates, update position
-		var graph = element.parentNode;
-		d3.select(element)
-		  .attr("cx", graph.domain_x(element.to_x(x_val)))
-		  .attr("cy", graph.domain_y(element.to_y(y_val)));
 	}
 };
+
 Tangle.classes.T3PlotLine = {
 	initialize: function (element, options, tangle, func) {
 		// Set the 3d plotter for this line
@@ -93,6 +100,57 @@ Tangle.classes.T3PlotLine = {
 		d3.select(element).attr("d", this.plotter(
 			this.xs.map(function(x) {return {'x': x, 'y': func(x) } })
 		));
+	}
+};
+
+Tangle.classes.T3ImShow = {
+	// also called 'heatmap' or '2d histogram'
+	setImShow: function(img, heat) {
+		var data = img.data;
+		var ymax = img.height, xmax = img.width;
+		for (var y = 0, p = -1; y < ymax; ++y) {
+			for (var x = 0; x < xmax; ++x) {
+				var c = heat(x, y); 
+				data[++p] = c.r;
+				data[++p] = c.g;
+				data[++p] = c.b;
+				data[++p] = 255;
+			}
+		}
+		img.data = data;
+	},
+	initialize: function (element, options, tangle, variable) {
+		
+		// Set the d3 scales for this graph (value transformations)
+		[t, l, b, r] = options.domain.split(" ");
+		[t, l, b, r] = [parseFloat(t), parseFloat(l), parseFloat(b), parseFloat(r)]
+		this.ctx = element.getContext("2d");
+		this.ctx.canvas.width = Math.abs(l-r)/otions.step);
+		this.ctx.canvas.height = Math.abs(b-t)/otions.step);
+
+		domain_x = d3.scale.linear()
+			.domain([l, r])
+			.range([0, this.ctx.canvas.width]);
+		domain_y = d3.scale.linear()
+			.domain([b, t])
+			.range([this.ctx.canvas.height, 0]);
+
+		var color = d3.scale.linear()
+		  .domain([0, .5, 1])
+		  .range(["#eff3ff", "#6baed6", "#08519c"]);
+		this.heat = function(mat) {
+			return function(x, y) {
+				return d3.rgb(color(
+					mat(domain_x.invert(x),domain_y.invert(y))
+				));
+			}
+		};
+		this.imgData = this.ctx.getImageData(0,0, 
+			this.ctx.canvas.width, this.ctx.canvas.width);
+	},
+	update: function (element, mat) {
+		this.setImShow(this.imgData, this.heat(mat))
+		this.ctx.putImageData(this.imgData,0,0);
 	}
 };
 

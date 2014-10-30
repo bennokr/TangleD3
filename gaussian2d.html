@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<style>
+path {
+  fill        : none;           
+  stroke      : #000;           
+  stroke-width: 1px;            
+}
+#example {
+  margin: 1em;
+  border: 1px solid #ccc;
+}
+</style>
+
+<script src="../d3/d3.v3.min.js" charset="utf-8"></script>
+<script src="../Tangle/Tangle.js"></script>
+<script src="../mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="../numeric-1.2.6.min.js"></script>
+
+<script src="tanglejax.js"></script>
+<script src="tangle_d3.js"></script>
+
+<div id="example" style="position:relative;">
+  $$
+   \tangle{x}{~~~~~x~~~~~} | \tangle{y}{~~~~~y~~~~~} \\ 
+  $$
+
+  <div style="height:400px; width:100%; position:relative;">
+    <canvas style="width:100%; height:100%; position:absolute; z-index: -1;" 
+      class="T3ImShow" data-var="mat"
+      data-domain="-2 -5 2 5" data-step="0.3"></canvas>
+    <svg width="100%" height="100%" class="T3Graph" data-domain="-2 -5 2 5">
+      <g class="T3DataPoint T3BoundedDraggable" data-var="x y">
+<!-- http://stackoverflow.com/questions/15943292/how-to-drag-svg-group-using-d3js-drag-behavior -->
+        <circle r="20" fill="white"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<script>
+MathJax.Hub.Register.StartupHook("End",function () {
+
+function multiNormal (mu, sigma, x) {
+  var k = numeric.dim(mu)[0];
+  // assert dimension correctness
+  var c = 1/ Math.sqrt(Math.pow(2*Math.PI, k)*numeric.det(sigma));
+  var l = numeric.sub(x, mu);
+  // c*exp{.5 * l^T . sigma^-1 . l}
+  var o = c * Math.exp(-0.5 * 
+        numeric.dot(l, numeric.dot(numeric.inv(sigma),l)));
+  return o;
+}
+
+var element = document.getElementById("example");
+
+tangle = new Tangle(element, {
+  initialize: function () {
+    this.x = 1;
+    this.y = 1;
+    this.x1 = -1;
+    this.y1 = -1;
+  },
+  update: function () {
+    var mu1 = this.x, mu2 = this.y;
+    this.mat = function(x, y) {
+      return multiNormal([mu1, mu2], [[1.7, 0.7],[0.6,0.6]], [x, y])*10;
+    }
+}});
+
+});
+</script>
