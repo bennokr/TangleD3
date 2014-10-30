@@ -41,6 +41,10 @@ Tangle.classes.tvar = {
 		var sym = element.parentNode.getElementsByClassName('tsym')[0];
 		element.style.width = sym.offsetWidth+'px';
 		element.style.height = sym.offsetHeight+'px';
+		element.style.position = "absolute";
+		element.style.textAlign = "center";
+		element.style.fontFamily = "STIXGeneral-Regular";
+		element.parentNode.style.display = "inline-block";
 
 		// Switch the value / symbol visibility on mouseover
 		element.style.visibility = 'hidden';
