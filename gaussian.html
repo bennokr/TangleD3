@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<style>
+path {
+  fill        : none;           
+  stroke      : #000;           
+  stroke-width: 1px;            
+}
+#example {
+  margin: 1em;
+  border: 1px solid #ccc;
+}
+</style>
+
+<script src="../d3/d3.v3.min.js" charset="utf-8"></script>
+<script src="../Tangle/Tangle.js"></script>
+<script src="../mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<link rel="stylesheet" type="text/css" href="tanglejax.css">
+<script src="tanglejax.js"></script>
+
+<script src="tangle_d3.js"></script>
+
+
+
+<div id="example">
+  $$
+    \newcommand{\varsigma}{\tangle{sigma data-step:0.1}{~~~\sigma~~~}}
+    \newcommand{\varmu}{\tangle{mu}{~~~\mu~~~}}
+
+    \mathcal{N}(x ~|~ \varsigma {^2}, \varmu) = 
+    
+    \tangle{v1}{
+      \frac{1}{(\sigma\sqrt{2\pi})}
+    }
+
+    \exp( - \frac{(x - \varmu)^2}{
+      \tangle{v2}{
+        2\sigma^2
+      }
+    })
+  $$
+
+  <svg width="100%" height="400" class="T3Graph" data-domain="2 -3 0 3">
+    <circle class="T3DataPoint" data-var="mu sigma" r="20"
+      data-to-y="return 1/(sigma * Math.sqrt(2*Math.PI))"
+      data-from-y="return 1/(y * Math.sqrt(2*Math.PI))" />
+    <path class="T3PlotLine" data-var="normal" />
+  </svg>
+</div>
+
+<script>
+MathJax.Hub.Register.StartupHook("End",function () {
+
+var element = document.getElementById("example");
+
+tangle = new Tangle(element, {
+  initialize: function () {
+    this.sigma = 1;
+    this.mu = 0;
+    this.v1 = 0;
+    this.v2 = 0;
+  },
+  update: function () {
+    this.v1 = 1 / (this.sigma*Math.sqrt(2*Math.PI));
+    this.v2 = 2 * Math.pow(this.sigma, 2);
+    var v1 = this.v1, v2 = this.v2, mu = this.mu;
+    this.normal = function(x) { 
+      return v1 * Math.exp( -(Math.pow(x - mu, 2) / v2) );
+    };
+}});
+
+});
+</script>

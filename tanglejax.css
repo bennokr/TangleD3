@@ -1,0 +1,8 @@
+.tvar {
+  position: absolute !important;
+  text-align: center !important;
+  font-family: STIXGeneral-Regular;
+}
+.thover {
+  display: inline-block !important;
+}
