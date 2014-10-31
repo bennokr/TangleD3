@@ -2,10 +2,13 @@
 <meta charset="utf-8">
 <body>
 <style>
-path {
+line, polygon {
   fill        : none;           
-  stroke      : #000;           
+  stroke      : red;           
   stroke-width: 1px;            
+}
+polygon {
+  fill        : red;           
 }
 #example {
   margin: 1em;
@@ -23,7 +26,10 @@ path {
 
 <div id="example" style="position:relative;">
   $$
-   \tangle{x}{~~~~~x~~~~~} | \tangle{y}{~~~~~y~~~~~} \\ 
+   \tangle{x}{~~~~~\mu_1~~~~~} | \tangle{y}{~~~~~\mu_1~~~~~} \\ 
+   \tangle{x1}{~~~~~\Sigma_{1,1}~~~~~} | \tangle{y1}{~~~~~\Sigma_{1,2}~~~~~} \\ 
+   \tangle{x2}{~~~~~\Sigma_{2,1}~~~~~} | \tangle{y2}{~~~~~\Sigma_{2,2}~~~~~} \\ 
+
   $$
 
   <div style="height:400px; width:100%; position:relative;">
@@ -31,10 +37,9 @@ path {
       class="T3ImShow" data-var="mat"
       data-domain="-2 -5 2 5" data-step="0.3"></canvas>
     <svg width="100%" height="100%" class="T3Graph" data-domain="-2 -5 2 5">
-      <g class="T3DataPoint T3BoundedDraggable" data-var="x y">
-<!-- http://stackoverflow.com/questions/15943292/how-to-drag-svg-group-using-d3js-drag-behavior -->
-        <circle r="20" fill="white"/>
-      </g>
+      <circle r="20" fill="red" class="T3DataPoint T3BoundedDraggable" data-var="x y" />
+      <g class="T3DataPoint T3Vector" data-var="x y x1 y1" data-domain="relative"/>
+      <g class="T3DataPoint T3Vector" data-var="x y x2 y2" data-domain="relative"/>
     </svg>
   </div>
 </div>
@@ -59,13 +64,16 @@ tangle = new Tangle(element, {
   initialize: function () {
     this.x = 1;
     this.y = 1;
-    this.x1 = -1;
-    this.y1 = -1;
+    this.x1 = 1.7;
+    this.y1 = 0.7;
+    this.x2 = 0.6;
+    this.y2 = 0.6;
   },
   update: function () {
     var mu1 = this.x, mu2 = this.y;
+    var x1 = this.x1, y1 = this.y1, x2 = this.x2, y2 = this.y2;
     this.mat = function(x, y) {
-      return multiNormal([mu1, mu2], [[1.7, 0.7],[0.6,0.6]], [x, y])*10;
+      return multiNormal([mu1, mu2], [[x1, x2],[y1,y2]], [x, y])*10;
     }
 }});
 

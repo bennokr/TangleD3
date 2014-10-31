@@ -51,6 +51,14 @@ Tangle.classes.T3DataPoint = {
 
 		element.domain_x = element.parentNode.domain_x.copy();
 		element.domain_y = element.parentNode.domain_y.copy();
+		if (options.domain == 'relative') {
+			element.relative_x = element.domain_x.copy();
+			element.relative_y = element.domain_y.copy();
+			[l,r] = element.relative_x.range();
+			element.relative_x.range([l-Math.abs(l-r)/2, r-Math.abs(l-r)/2,]);
+			[t,b] = element.relative_y.range();
+			element.relative_y.range([t-Math.abs(t-b)/2, b-Math.abs(t-b)/2,]);
+		}
 	},
 	update: function (element, x_val, y_val) {
 		// Transform values to coordinates, update position
@@ -63,12 +71,10 @@ Tangle.classes.T3DataPoint = {
 
 Tangle.classes.T3BoundedDraggable = {
 	initialize: function (element, options, tangle, x_var, y_var) {
-		element.coolness = 'fleeting';
 		// Set this points drag behaviour
 		var drag = d3.behavior.drag()
 			.origin(Object)
 			.on("drag", function(){
-				console.log('bounded', d3.event.sourceEvent.target.coolness);
 				var el = d3.select(this);
 				[cx, cy] = d3.transform(el.attr("transform")).translate;
 				var w = element.parentNode.offsetWidth,
@@ -81,6 +87,37 @@ Tangle.classes.T3BoundedDraggable = {
 				tangle.setValue(y_var, this.from_y(element.domain_y.invert(cy)));
 			});
 		d3.select(element).call(drag);
+	}
+};
+
+Tangle.classes.T3Vector = {
+	initialize: function (element, options, tangle, x_var, y_var, px_var, py_var) {
+		console.log(px_var, py_var);
+		this.head = d3.select(element).append("svg:polygon")
+		    .attr("points", "0,0, -10,20, 10,20")
+		    .call(d3.behavior.drag()
+				.on("drag", function(d,i) {
+					var el = d3.select(this);
+					[cx, cy] = d3.transform(el.attr("transform")).translate;
+				    cx += d3.event.dx;
+				    cy += d3.event.dy;
+					tangle.setValue(px_var, element.from_x(element.relative_x.invert(cx)));
+					tangle.setValue(py_var, element.from_y(element.relative_y.invert(cy)));
+
+				})
+			);
+		this.line = d3.select(element).append("line");
+	},
+	update: function (element, x, y, px, py) {
+		px = element.relative_x(element.to_x(px));
+		py = element.relative_y(element.to_y(py));
+		angle = 90+ Math.atan2(py - y, px - x) * 180 / Math.PI;
+		this.head.attr("transform", 
+			"translate(" + [ px,py ] + ") rotate("+angle+")"
+		);
+		this.line
+			.attr("x2", px)
+			.attr("y2", py);
 	}
 };
 
