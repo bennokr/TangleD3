@@ -41,13 +41,13 @@ Tangle.classes.T3NumberField = {
 Tangle.classes.T3DataPoint = {
 	initialize: function (element, options, tangle, x_var, y_var) {
 		// Construct the mapping for this point's position
-		var make = function(code, name) {
-			return code? new Function(name, code) : function(d) { return d; };
+		var make = function(code, names, default_name) {
+			return new Function(names, code? code : "return " + default_name);
 		}
-		element.from_x = make(options['from-x'], 'x');
-		element.to_x = make(options['to-x'], x_var);
-		element.from_y = make(options['from-y'], 'y');
-		element.to_y = make(options['to-y'], y_var);
+		element.from_x = make(options['from-x'], 'x,y', 'x');
+		element.to_x = make(options['to-x'], x_var+','+y_var, x_var);
+		element.from_y = make(options['from-y'], 'x,y', 'y');
+		element.to_y = make(options['to-y'], x_var+','+y_var, y_var);
 
 		element.domain_x = element.parentNode.domain_x.copy();
 		element.domain_y = element.parentNode.domain_y.copy();
@@ -62,8 +62,8 @@ Tangle.classes.T3DataPoint = {
 	},
 	update: function (element, x_val, y_val) {
 		// Transform values to coordinates, update position
-		var x = element.domain_x(element.to_x(x_val)),
-		    y = element.domain_y(element.to_y(y_val));
+		var x = element.domain_x(element.to_x(x_val, y_val)),
+		    y = element.domain_y(element.to_y(x_val, y_val));
 		d3.select(element)
 		  .attr("transform", "translate("+x+","+y+")");
 	}
@@ -82,9 +82,11 @@ Tangle.classes.T3BoundedDraggable = {
 				// Keep the point in the boundary
 				cx = Math.max(0, Math.min(w, cx + d3.event.dx));
 				cy = Math.max(0, Math.min(h, cy + d3.event.dy));
-				// Transform coordinates to values 
-				tangle.setValue(x_var, this.from_x(element.domain_x.invert(cx)));
-				tangle.setValue(y_var, this.from_y(element.domain_y.invert(cy)));
+				// Transform coordinates to values
+				cx = element.domain_x.invert(cx);
+				cy = element.domain_y.invert(cy);
+				tangle.setValue(x_var, this.from_x(cx,cy));
+				tangle.setValue(y_var, this.from_y(cx,cy));
 			});
 		d3.select(element).call(drag);
 	}
@@ -101,16 +103,18 @@ Tangle.classes.T3Vector = {
 					[cx, cy] = d3.transform(el.attr("transform")).translate;
 				    cx += d3.event.dx;
 				    cy += d3.event.dy;
-					tangle.setValue(px_var, element.from_x(element.relative_x.invert(cx)));
-					tangle.setValue(py_var, element.from_y(element.relative_y.invert(cy)));
+				    cx = element.relative_x.invert(cx);
+					cy = element.relative_y.invert(cy);
+					tangle.setValue(px_var, element.from_x(cx, cy));
+					tangle.setValue(py_var, element.from_y(cx, cy));
 
 				})
 			);
 		this.line = d3.select(element).append("line");
 	},
 	update: function (element, x, y, px, py) {
-		px = element.relative_x(element.to_x(px));
-		py = element.relative_y(element.to_y(py));
+		px = element.relative_x(element.to_x(px, py));
+		py = element.relative_y(element.to_y(px, py));
 		angle = 90+ Math.atan2(py - y, px - x) * 180 / Math.PI;
 		this.head.attr("transform", 
 			"translate(" + [ px,py ] + ") rotate("+angle+")"
@@ -131,11 +135,25 @@ Tangle.classes.T3PlotLine = {
 		  .x(function(d) { return graph.domain_x(d.x); })
 		  .y(function(d) { return graph.domain_y(d.y); })
 		  .interpolate("linear");
+		var dom = graph.domain_y.domain();
+		this.bound_inf = function(y) {
+			if (y == Number.POSITIVE_INFINITY) {
+				return dom[1];
+			}
+			if (y == Number.NEGATIVE_INFINITY) {
+				return dom[0];
+			}
+			if (isNaN(y)) {
+				return 0;
+			}
+			return y;
+		}
 	},
 	update: function (element, func) {
 		// Map func over the xs points and update the line
+		var bound_inf = this.bound_inf;
 		d3.select(element).attr("d", this.plotter(
-			this.xs.map(function(x) {return {'x': x, 'y': func(x) } })
+			this.xs.map(function(x) {return {'x': x, 'y': bound_inf(func(x)) } })
 		));
 	}
 };
