@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<style>
+path {
+  fill        : none;           
+  stroke      : #000;           
+  stroke-width: 1px;            
+}
+#example {
+  margin: 1em;
+  border: 1px solid #ccc;
+}
+</style>
+
+<script src="../d3/d3.v3.min.js" charset="utf-8"></script>
+<script src="../Tangle/Tangle.js"></script>
+<script src="../mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+<script src="tanglejax.js"></script>
+<script src="tangle_d3.js"></script>
+
+<script src="gamma.js"></script>
+
+
+<div id="example">
+  $$
+       \tangle{a}{~~~~~a~~~~~} | \tangle{b}{~~~~~b~~~~~} \\ 
+  $$
+
+  <svg width="100%" height="400" class="T3Graph" data-domain="5 0 0 1">
+    <circle class="T3DataPoint T3BoundedDraggable" data-var="a b" r="20"
+      data-from-x="return Math.sqrt(x*x + (y*2)*(y*2))"
+      data-from-y="return Math.sqrt((1-x)*(1-x) + (y*2)*(y*2))"
+      data-to-x="return (a*a - b*b + 1)/2"
+      data-to-y="return Math.sqrt((-a-b-1)*(a-b-1)*(a-b+1)*(a+b-1))/4"
+    />
+    <path class="T3PlotLine" data-var="beta" />
+  </svg>
+</div>
+
+<script>
+
+MathJax.Hub.Register.StartupHook("End",function () {
+
+var element = document.getElementById("example");
+
+tangle = new Tangle(element, {
+  initialize: function () {
+    this.a = 5;
+    this.b = 2;
+  },
+  update: function () {
+    var a = this.a, b = this.b;
+    var c = gamma(a+b) / (gamma(a) * gamma(b));
+    this.beta = function(x) {
+      return c * Math.pow(x, a-1) * Math.pow(1-x, b-1);
+    };
+}});
+
+});
+</script>
