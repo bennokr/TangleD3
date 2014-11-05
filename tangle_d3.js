@@ -54,9 +54,11 @@ Tangle.classes.T3DataPoint = {
 		if (options.domain == 'relative') {
 			element.relative_x = element.domain_x.copy();
 			element.relative_y = element.domain_y.copy();
-			[l,r] = element.relative_x.range();
+			rng = element.relative_x.range();
+			l = rng[0]; r = rng[1];
 			element.relative_x.range([l-Math.abs(l-r)/2, r-Math.abs(l-r)/2,]);
-			[t,b] = element.relative_y.range();
+			rng = element.relative_y.range();
+			t = rng[0]; b = rng[1];
 			element.relative_y.range([t-Math.abs(t-b)/2, b-Math.abs(t-b)/2,]);
 		}
 	},
@@ -76,7 +78,8 @@ Tangle.classes.T3BoundedDraggable = {
 			.origin(Object)
 			.on("drag", function(){
 				var el = d3.select(this);
-				[cx, cy] = d3.transform(el.attr("transform")).translate;
+				cs = d3.transform(el.attr("transform")).translate;
+				cx = cs[0]; cy = cs[1];
 				var w = element.parentNode.offsetWidth,
 				    h = element.parentNode.offsetHeight;
 				// Keep the point in the boundary
@@ -100,7 +103,8 @@ Tangle.classes.T3Vector = {
 		    .call(d3.behavior.drag()
 				.on("drag", function(d,i) {
 					var el = d3.select(this);
-					[cx, cy] = d3.transform(el.attr("transform")).translate;
+					cs = d3.transform(el.attr("transform")).translate;
+				    cx = cs[0]; cy = cs[1];
 				    cx += d3.event.dx;
 				    cy += d3.event.dy;
 				    cx = element.relative_x.invert(cx);
@@ -129,7 +133,8 @@ Tangle.classes.T3PlotLine = {
 	initialize: function (element, options, tangle, func) {
 		// Set the 3d plotter for this line
 		var graph = element.parentNode;
-		var [l, r] = graph.domain_x.domain();
+		dom = graph.domain_x.domain();
+		l = dom[0]; r = dom[1];
 		this.xs = d3.range(l, r, Math.abs(l-r)/100);
 		this.plotter = d3.svg.line()
 		  .x(function(d) { return graph.domain_x(d.x); })
@@ -177,8 +182,12 @@ Tangle.classes.T3ImShow = {
 	initialize: function (element, options, tangle, variable) {
 		
 		// Set the d3 scales for this graph (value transformations)
-		[t, l, b, r] = options.domain.split(" ");
-		[t, l, b, r] = [parseFloat(t), parseFloat(l), parseFloat(b), parseFloat(r)];
+		dom = options.domain.split(" ");
+		t=dom[0]; l=dom[1]; b=dom[2]; r=dom[3];
+		t = parseFloat(t);
+		l = parseFloat(l);
+		b = parseFloat(b);
+		r = parseFloat(r);
 		this.ctx = element.getContext("2d");
 		this.ctx.canvas.width = Math.abs(l-r)/options.step;
 		this.ctx.canvas.height = Math.abs(b-t)/options.step;
@@ -212,7 +221,8 @@ Tangle.classes.T3ImShow = {
 Tangle.classes.T3Graph = {
 	initialize: function (element, options, tangle, variable) {
 		// Set the d3 scales for this graph (value transformations)
-		[t, l, b, r] = options.domain.split(" ");
+		dom = options.domain.split(" ");
+		t=dom[0]; l=dom[1]; b=dom[2]; r=dom[3];
 		element.domain_x = d3.scale.linear()
 			.domain([parseFloat(l), parseFloat(r)])
 			.range([0, element.offsetWidth]);
