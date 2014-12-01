@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <body>
 <style>
-line, polygon {
+line {
   fill        : none;           
   stroke      : red;           
   stroke-width: 1px;            
@@ -16,17 +16,27 @@ polygon {
 }
 </style>
 
+<!-- Uncomment if you have these files locally on your computer.
 <script src="../d3/d3.v3.min.js" charset="utf-8"></script>
 <script src="../Tangle/Tangle.js"></script>
 <script src="../mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script src="../numeric-1.2.6.min.js"></script>
+-->
+<script type="text/javascript"
+  src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script type="text/javascript" 
+  src="https://rawgit.com/worrydream/Tangle/master/Tangle.js"></script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript"
+  src="http://numericjs.com/lib/numeric-1.2.6.min.js"></script>
 
 <script src="tanglejax.js"></script>
 <script src="tangle_d3.js"></script>
 
 <div id="example" style="position:relative;">
   $$
-   \tangle{x}{~~~~~\mu_1~~~~~} | \tangle{y}{~~~~~\mu_1~~~~~} \\ 
+   \tangle{x}{~~~~~\mu_1~~~~~} | \tangle{y}{~~~~~\mu_2~~~~~} \\ 
    \tangle{x1}{~~~~~\Sigma_{1,1}~~~~~} | \tangle{y1}{~~~~~\Sigma_{1,2}~~~~~} \\ 
    \tangle{x2}{~~~~~\Sigma_{2,1}~~~~~} | \tangle{y2}{~~~~~\Sigma_{2,2}~~~~~} \\ 
 
