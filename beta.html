@@ -33,14 +33,14 @@ path {
 
 <div id="example">
   $$
-       \tangle{a_}{~~~~~a~~~~~} | \tangle{b_}{~~~~~b~~~~~} \\ 
+       \tangle{b}{~~~~~b~~~~~} | \tangle{a}{~~~~~a~~~~~} \\ 
   $$
-  <svg width="100%" height="400" class="T3Graph" data-domain="1 0 0 1">
+  <svg width="100%" height="400" class="T3Graph" data-domain="3 0.0001 0.0001 0.9999">
     <circle class="T3DataPoint T3BoundedDraggable" data-var="a b" r="20"
-      data-from-x="return Math.sqrt(x*x + y*y) - 0.5"
-      data-from-y="return Math.sqrt((1-x)*(1-x) + y*y) - 0.5"
-      data-to-x="a+=.5; b+=.5; return (a*a - b*b + 1)/2"
-      data-to-y="a+=.5; b+=.5; return Math.sqrt((-a-b-1)*(a-b-1)*(a-b+1)*(a+b-1))/2"
+      data-from-x="return y+y*(x/(1-x))"
+      data-from-y="return y+y*((1-x)/x)"
+      data-to-x  ="return (a/(a+b))"
+      data-to-y  ="return (a*(b/(a+b)))"
     />
     <path class="T3PlotLine" data-var="beta" />
   </svg>
@@ -54,18 +54,15 @@ var element = document.getElementById("example");
 
 tangle = new Tangle(element, {
   initialize: function () {
-    this.a = 0.8;
-    this.b = 0.5;
+    this.a = 4;
+    this.b = 2.5;
   },
   update: function () {
-    this.a = Math.max(0, this.a);
-    this.b = Math.max(0, this.b);
-    this.a_ = this.a *5;
-    this.b_ = this.b *5;
-    var a = this.a*5, b = this.b*5;
-    var c = gamma(a+b) / (gamma(a) * gamma(b));
+    var a = this.a, b = this.b;
+    var c = 0;
+    try { c = gamma(a+b) / (gamma(a) * gamma(b)); } catch (err) {}
     this.beta = function(x) {
-      return 0.2 * c * Math.pow(x, a-1) * Math.pow(1-x, b-1);
+      return c * Math.pow(x, a-1) * Math.pow(1-x, b-1);
     };
 }});
 
